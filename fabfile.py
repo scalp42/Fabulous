@@ -19,20 +19,19 @@ env.deploy_via = 'remote_cache'
 env.applicationdir = "/home/#{user}/www/#{application}"
 env.deploy_to = env.applicationdir
 
-# Main method that hooks everything up
-def main():
+def staging(branch='staging', node='1'):
+  env.roledefs = {
+    'web' : [
+      'deploy@s-app%(node)s.taskrabbit.net' % {'node': node}
+    ]
+  }
 
-  print("Starting deploy")
-  line_break()
+def production(branch='production'):
+  env.roledefs = {
+    'web' : [
+      'deploy@prod-app8.taskrabbit.net'
+    ]
+  }
 
-if __name__ == "__main__":
-  main()
-
-
-def staging(branch='staging',node='1'):
-	env.roledefs = {
-		'web' : ['deploy@s-app%(node)s.taskrabbit.net' % node]
-		}
-	update_env()
-
-def 
+def test():
+  print(env.roledefs['web'])
