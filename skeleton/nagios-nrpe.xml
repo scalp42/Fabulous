@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+   <!DOCTYPE service_bundle SYSTEM "/usr/share/lib/xml/dtd/service_bundle.dtd.1">
+
+   <service_bundle type='manifest' name='nagios-nrpe'>
+   <service name='network/nagios/nrpe' version='1' type='service'>
+
+      <create_default_instance enabled='false' />
+
+      <single_instance />
+
+      <dependency name='multi-user' grouping='require_all' restart_on='none' type='service'>
+         <service_fmri value='svc:/milestone/multi-user' />
+      </dependency>
+
+      <method_context>
+         <method_credential user='nagios' group='nagios'/>
+         <method_environment>
+            <envvar name='BASEDIR' value='/usr/local/nagios'/>
+            </method_environment>
+      </method_context>
+
+      <exec_method type='method' name='start' exec='$BASEDIR/bin/nrpe -c $BASEDIR/etc/nrpe.cfg -d' timeout_seconds='60'/>
+      <exec_method type='method' name='stop' exec=':kill' timeout_seconds='60'/>
+
+      <property_group name='general' type='framework'>
+         <propval name='enabled' type='boolean' value='false'/>
+         <propval name='action_authorization' type='astring' value='solaris.smf.manage.nagios-nrpe'/>
+         <propval name='value_authorization' type='astring' value='solaris.smf.manage.nagios-nrpe'/>
+      </property_group>
+
+      <property_group name='startd' type='framework'>
+         <propval name='ignore_error' type='astring' value='core,signal' />
+      </property_group>
+      <stability value='Unstable' />
+   </service>
+</service_bundle>
