@@ -7,6 +7,10 @@ import time
 import utils
 from fabric.api import *
 from fabric.contrib import *
+from fabric.colors import _wrap_with
+from fabric.colors import *
+
+green_bg = _wrap_with('42')
 
 env.application = 'taskrabbit'
 env.username = 'deploy'
@@ -19,6 +23,7 @@ env.deploy_via = 'remote_cache'
 env.applicationdir = '/home/%(user)s/www/%(application)s' % {'user': env.username, 'application': env.application}
 env.deploy_to = env.applicationdir
 env.local_dir = '~/taskrabbit/web'
+env.macos = local('sw_vers -productVersion', capture=True)
 
 def staging(branch='staging', node='2'):
   env.roledefs = {
@@ -28,6 +33,7 @@ def staging(branch='staging', node='2'):
   }
   env.branch = branch
   env.state = 'staging'
+  env.node = node
 
 def production(branch='production'):
   env.roledefs = {
@@ -50,6 +56,13 @@ def setup_repo():
   cache_dir = '%(app_dir)s/shared/cached-copy' % {'app_dir': env.applicationdir}
   deploy_dir = '%(app_dir)s/releases/%(timestamp)s' % {'app_dir': env.applicationdir, 'timestamp': timestamp}
   geo_lite_file = '%(app_dir)s/shared/config/GeoLiteCity.dat' % {'app_dir': env.applicationdir}
+
+  print green_bg("TEST COLORS")
+
+  print(cyan("Testing colors"))
+
+  warn(yellow("BE CAREFUL BLABLA"))
+
 
   if(files.exists(cache_dir)):
     with cd(cache_dir):
@@ -136,13 +149,13 @@ def setup_repo():
   if(env.state == 'staging'):
     utils.line_break()
     print("Killing unicorns, the bastards...")
+    print(red("Killing unicorns, the bastards..."))
     utils.line_break()
     with settings(warn_only=True):
       run('pkill -f unicorn')
       if(files.exists('%(app_dir)s/current/config/unicorn/%(state)s' % {'state': env.state, 'app_dir': env.applicationdir})):
         with cd('%(app_dir)s/current' % {'app_dir': env.applicationdir}):
           run('BUNDLE_GEMFILE=%(app_dir)s/current/Gemfile bundle exec unicorn_rails -c %(app_dir)s/current/config/unicorn/%(state)s.rb -E %(state)s -D' % {'app_dir': env.applicationdir, 'state': env.state})
-
   elif(env.state == 'production'):
     if(files.exists('%(app_dir)s/current/tmp/pids/unicorn.pid' % {'app_dir': env.applicationdir})):
       print("PRODUCTION UNICORN RELOAD VOILA")
@@ -152,10 +165,15 @@ def setup_repo():
       run('bundle exec rake page_cache:refresher:disable_all cache:clear_rescue cache:clear_storehouse dj:disable dj:stop dj:enable dj:start RAILS_ENV=%(state)s' % {'state': env.state})
       run('rm -fr shared/cache/*')
 
-@roles('web')
 def deploy():
   """Run the deploy"""
-  setup_repo()
+  if(env.state == 'staging' and env.macos == '10.8'):
+    local('terminal-notifier -message "Deploying %(branch)s to s-app%(node)s" -title "Fabric"' % {'branch' : env.branch, 'node': env.node})
+    #local('say -v Vicki "Deployment to s-app%(node)s started. Hang tight."' % {'node': env.node})
+  execute(setup_repo)
+  if(env.state == 'staging' and env.macos == '10.8'):
+    local('terminal-notifier -message "Deployed %(branch)s to s-app%(node)s !" -title "Fabric" -subtitle "DONE"' % {'branch' : env.branch, 'node': env.node})
+    #local('say -v Vicki "Deployment to s-app%(node)s is finished. Have fun."' % {'node': env.node})
 
 if __name__ == '__main__':
   execute(deploy)
