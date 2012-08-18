@@ -153,7 +153,7 @@ def setup_repo():
     utils.line_break()
     with settings(warn_only=True):
       run('pkill -f unicorn')
-      if(files.exists('%(app_dir)s/current/config/unicorn/%(state)s' % {'state': env.state, 'app_dir': env.applicationdir})):
+      if(files.exists('%(app_dir)s/current/config/unicorn/%(state)s.rb' % {'state': env.state, 'app_dir': env.applicationdir})):
         with cd('%(app_dir)s/current' % {'app_dir': env.applicationdir}):
           run('BUNDLE_GEMFILE=%(app_dir)s/current/Gemfile bundle exec unicorn_rails -c %(app_dir)s/current/config/unicorn/%(state)s.rb -E %(state)s -D' % {'app_dir': env.applicationdir, 'state': env.state})
   elif(env.state == 'production'):
