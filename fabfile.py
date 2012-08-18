@@ -113,9 +113,8 @@ def setup_repo():
   run('ls -x %(app_dir)s/releases' % {'app_dir': env.applicationdir})
 
   with cd(deploy_dir):
-    run('bundle exec rake RAILS_ENV=%(state)s db:migrate 1> /dev/null' % {'state': env.state})
+    run('bundle exec rake RAILS_ENV=%(state)s db:migrate compass:compile db:seed 1> /dev/null' % {'state': env.state})
     run('ln -sf %(deploy_dir)s %(app_dir)s/current' % {'deploy_dir': deploy_dir, 'app_dir': env.applicationdir})
-    run('bundle exec rake compass:compile db:seed RAILS_ENV=%(state)s' % {'state': env.state})
     run('bundle exec jammit')
     run('cp public/robots_disallow.txt public/robots.txt')
     run('rm -f %(app_dir)s/current' % {'app_dir': env.applicationdir})
@@ -150,10 +149,8 @@ def setup_repo():
 
   with cd('%(app_dir)s' % {'app_dir': env.applicationdir}):
     with cd('%(app_dir)s/current' % {'app_dir': env.applicationdir}):
-      run('bundle exec rake page_cache:refresher:disable_all cache:clear_rescue RAILS_ENV=%(state)s' % {'state': env.state})
+      run('bundle exec rake page_cache:refresher:disable_all cache:clear_rescue cache:clear_storehouse dj:disable dj:stop dj:enable dj:start RAILS_ENV=%(state)s' % {'state': env.state})
       run('rm -fr shared/cache/*')
-    with cd('%(app_dir)s/current' % {'app_dir': env.applicationdir}):
-      run('bundle exec rake cache:clear_storehouse dj:disable dj:stop dj:enable dj:start RAILS_ENV=%(state)s' % {'state': env.state})
 
 @roles('web')
 def deploy():
