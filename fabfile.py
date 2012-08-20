@@ -12,29 +12,34 @@ from fabric.colors import *
 
 green_bg = _wrap_with('42')
 
+env.user = 'deploy'
 env.application = 'taskrabbit'
-env.username = 'deploy'
 env.repository = 'git@github.com:runmyerrand/runmyerrand.git'
 env.pull_url = 'https://github.com/runmyerrand/runmyerrand/pull'
 env.scm = 'git'
 env.admin_runner = 'deploy'
 env.keep_releases = '5'
 env.deploy_via = 'remote_cache'
-env.applicationdir = '/home/%(user)s/www/%(application)s' % {'user': env.username, 'application': env.application}
+env.applicationdir = '/home/%(user)s/www/%(application)s' % {'user': env.user, 'application': env.application}
 env.deploy_to = env.applicationdir
 env.local_dir = '~/taskrabbit/web'
 #env.macos = local('sw_vers -productVersion', capture=True)
+env.abort_on_prompts = True
+env.disable_known_hosts = True
+env.skip_bad_hosts = True
+env.keepalive = True
+env.connection_attempts = '2'
 
 @task
-def staging(branch='staging', node='2'):
-  env.roledefs = { 'web': ['%(user)s@s-app%(node)s.taskrabbit.net' % {'user': env.username, 'node': node}] }
+def staging(branch='master', node='42'):
+  env.roledefs = { 'web': ['s-app%(node)s.taskrabbit.net' % {'node': node}] }
   env.branch = branch
   env.env = 'staging'
   env.node = node
 
 @task
 def production(branch='production'):
-  env.roledefs = { 'web': ['%(user)s@prod-app8.taskrabbit.net' % {'user': env.username}] }
+  env.roledefs = { 'web': ['%(user)s@prod-app42.taskrabbit.net' % {'user': env.user}] }
   env.branch = branch
   env.env = 'production'
 
@@ -59,7 +64,7 @@ def setup_repo():
   else:
     run('git clone -q %(repo)s %(cache_dir)s' % {'repo': env.repository, 'cache_dir': cache_dir})
     with cd('%(cache_dir)s' % {'cache_dir': cache_dir}):
-      run('git checkout -q -b %(user)s %(sha)s;' % {'sha': sha, 'user': env.username})
+      run('git checkout -q -b %(user)s %(sha)s;' % {'sha': sha, 'user': env.user})
 
   with cd(cache_dir):
     run('cp -RPp %(cache_dir)s %(deploy_dir)s' % {'cache_dir': cache_dir, 'deploy_dir': deploy_dir})
