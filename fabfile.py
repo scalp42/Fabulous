@@ -29,6 +29,7 @@ env.disable_known_hosts = True
 env.skip_bad_hosts = True
 env.keepalive = True
 env.connection_attempts = '2'
+env.local_cached = '%(local_dir)s/cached-copy' % {'local_dir': env.local_dir}
 
 @task
 def staging(branch='master', node='42'):
@@ -55,6 +56,19 @@ def setup_repo():
   cache_dir = '%(app_dir)s/shared/cached-copy' % {'app_dir': env.applicationdir}
   deploy_dir = '%(app_dir)s/releases/%(timestamp)s' % {'app_dir': env.applicationdir, 'timestamp': timestamp}
   geo_lite_file = '%(app_dir)s/shared/config/GeoLiteCity.dat' % {'app_dir': env.applicationdir}
+
+  with settings(warn_only=True):
+    if(local('ls %(local_cached)s/cached-copy' % {'local_cached': env.local_dir}).succeeded == True):
+      with lcd(env.local_cached):
+#        local('git clean -df')
+#        local('git pull')
+        local('git fetch origin')
+        local('pwd ; git reset --hard %(sha)s' % {'sha': sha})
+        local('git clean -d -x -f')
+    else:
+      local('git clone %(repo)s %(local_cached)s/cached-copy' % {'repo': env.repository, 'local_cached': env.local_dir})
+      with lcd(env.local_cached):
+        local('git checkout -b %(user)s %(sha)s;' % {'sha': sha, 'user': env.user})
 
   if(files.exists(cache_dir)):
     with cd(cache_dir):
@@ -98,7 +112,6 @@ def setup_repo():
     {'file': 'database.yml'},
     {'file': 'core.yml'},
     {'file': 'authorize_net.yml'},
-    {'file': 'braintree.yml'},
     {'file': 'braintree.yml'},
     {'file': 'google_maps.yml'},
     {'file': 'server.yml'},
@@ -160,10 +173,10 @@ def notification(status):
   """Output notification"""
   env.macos = local('sw_vers -productVersion', capture=True)
   if(env.macos == '10.8' and status == 'started'):
-    local('terminal-notifier -message "Deployment of %(branch)s on s-app%(node)s %(status)s." -title "Fabric"' % {'branch': env.branch, 'node': env.node, 'status': status})
+    local('terminal-notifier -message "Deployment of %(branch)s on s-app%(node)s %(status)s." -title "Fabric"' % {'branch': env.branch.upper(), 'node': env.node, 'status': status})
     #local('say -v Vicki "Deployment to s-app%(node)s started. Hang tight."' % {'node': env.node})
   if(env.macos == '10.8' and status == 'finished'):
-    local('terminal-notifier -message "Deployment of %(branch)s on s-app%(node)s is %(status)s !" -title "Fabric" -subtitle "DONE"' % {'branch': env.branch, 'node': env.node, 'status': status})
+    local('terminal-notifier -message "Deployment of %(branch)s on s-app%(node)s is %(status)s !" -title "Fabric" -subtitle "DONE"' % {'branch': env.branch.upper(), 'node': env.node, 'status': status})
     #local('say -v Vicki "Deployment to s-app%(node)s is finished. Have fun."' % {'node': env.node})
 
 @task
