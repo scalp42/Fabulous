@@ -6,6 +6,10 @@ def setup():
   import subprocess
 
   line_break()
+  print("Installing python2.7...")
+  subprocess.call(['brew', 'install', 'python'])
+
+  line_break()
   print("Installing pip...")
   subprocess.call(['sudo', 'easy_install-2.7', 'pip'])
 
