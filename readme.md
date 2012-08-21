@@ -1,4 +1,4 @@
-# How to deply:
+# How to deploy:
 
 fab staging:branch=branch_name,node=node_number deploy
 
@@ -6,3 +6,4 @@ fab staging:branch=branch_name,node=node_number deploy
 
 * No production deploy ability yet
 * More seed!
+* Divide tasks
