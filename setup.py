@@ -11,7 +11,9 @@ def setup():
 
   line_break()
   print("Installing pip...")
-  subprocess.call(['sudo', 'easy_install-2.7', 'pip'])
+  subprocess.call(['easy_install-2.7', 'pip'])
+  # if you got permissions issues and bad install, use this
+  # subprocess.call(['sudo', 'easy_install-2.7', 'pip'])
 
   line_break()
   print("Installing Fabric...")
