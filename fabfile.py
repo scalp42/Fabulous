@@ -143,7 +143,8 @@ def setup_repo():
     print(red("Killing unicorns, the bastards..."))
     utils.line_break()
     with settings(warn_only=True):
-      run('pkill -f unicorn')
+      run('pkill -KILL -f unicorn')
+      run('pkill -KILL -f delayed')
       if(files.exists('%(app_dir)s/current/config/unicorn/%(state)s.rb' % {'state': env.env, 'app_dir': env.applicationdir})):
         with cd('%(app_dir)s/current' % {'app_dir': env.applicationdir}):
           run('BUNDLE_GEMFILE=%(app_dir)s/current/Gemfile bundle exec unicorn_rails -c %(app_dir)s/current/config/unicorn/%(state)s.rb -E %(state)s -D' % {'app_dir': env.applicationdir, 'state': env.env})
@@ -153,7 +154,7 @@ def setup_repo():
 
   with cd('%(app_dir)s' % {'app_dir': env.applicationdir}):
     with cd('%(app_dir)s/current' % {'app_dir': env.applicationdir}):
-      run('bundle exec rake page_cache:refresher:disable_all cache:clear_rescue cache:clear_storehouse dj:disable dj:stop dj:enable dj:start RAILS_ENV=%(state)s' % {'state': env.env})
+      run('bundle exec rake page_cache:refresher:disable_all cache:clear_rescue cache:clear_storehouse dj:enable dj:start RAILS_ENV=%(state)s' % {'state': env.env})
       run('rm -fr shared/cache/*')
 
 def notification(status):
