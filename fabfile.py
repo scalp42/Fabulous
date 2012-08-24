@@ -31,7 +31,7 @@ env.keepalive = True
 env.connection_attempts = '2'
 
 @task
-def staging(branch='master', node='42'):
+def staging(branch='rails3', node='6'):
   env.roledefs = { 'web': ['s-app%(node)s.taskrabbit.net' % {'node': node}] }
   env.branch = branch
   env.env = 'staging'
@@ -143,8 +143,8 @@ def setup_repo():
     print(red("Killing unicorns, the bastards..."))
     utils.line_break()
     with settings(warn_only=True):
-      run('pkill -f unicorn')
-      run('pkill -f delayed')
+      run('pkill -KILL -f unicorn')
+      run('pkill -KILL -f delayed')
       if(files.exists('%(app_dir)s/current/config/unicorn/%(state)s.rb' % {'state': env.env, 'app_dir': env.applicationdir})):
         with cd('%(app_dir)s/current' % {'app_dir': env.applicationdir}):
           run('BUNDLE_GEMFILE=%(app_dir)s/current/Gemfile bundle exec unicorn_rails -c %(app_dir)s/current/config/unicorn/%(state)s.rb -E %(state)s -D' % {'app_dir': env.applicationdir, 'state': env.env})
