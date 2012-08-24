@@ -31,7 +31,7 @@ env.keepalive = True
 env.connection_attempts = '2'
 
 @task
-def staging(branch='rails3', node='6'):
+def staging(branch='master', node='42'):
   env.roledefs = { 'web': ['s-app%(node)s.taskrabbit.net' % {'node': node}] }
   env.branch = branch
   env.env = 'staging'
