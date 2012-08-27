@@ -71,7 +71,7 @@ def setup_repo():
     run('echo %(sha)s > %(deploy_dir)s/REVISION' % {'sha': sha, 'deploy_dir': deploy_dir})
 
   with cd(deploy_dir):
-    run('bundle install --gemfile %(deploy_dir)s/Gemfile --path %(app_dir)s/shared/bundle --quiet --without development test cucumber' % {'deploy_dir': deploy_dir, 'app_dir': env.applicationdir})
+    run('bundle install --gemfile %(deploy_dir)s/Gemfile --path %(app_dir)s/shared/bundle --deployment --quiet --without development test cucumber' % {'deploy_dir': deploy_dir, 'app_dir': env.applicationdir})
     run('./script/gem_downgrade_time')
 
   run('chmod -R g+w %(deploy_dir)s' % {'deploy_dir': deploy_dir})
